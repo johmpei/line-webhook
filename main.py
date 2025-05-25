@@ -8,12 +8,17 @@ def home():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.json
-    print("📥 Webhook受信データ:", data)  # まず中身全部見る！
+    data = request.get_json(force=True)  # ← force=True で確実にJSONとして扱う
+    print("📥 Webhook受信データ（生）:", data)  # 全部表示！
 
-    for event in data.get("events", []):
-        user_id = event.get("source", {}).get("userId")
-        print("🔥 userId:", user_id)  # ← これがログに出るようにする！
+    # 念のため events があるかチェック
+    if "events" not in data:
+        print("⚠ 'events' キーが見つかりません！")
+    else:
+        for event in data["events"]:
+            print("🧩 event:", event)
+            user_id = event.get("source", {}).get("userId")
+            print("🔥 userId:", user_id)
 
     return jsonify({"status": "ok"})
 
