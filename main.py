@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import json
 
 app = Flask(__name__)
 
@@ -8,16 +9,13 @@ def home():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json(force=True)  # ← force=True が超重要！！
-    print("📥 Webhook受信データ（生）:", data, flush=True)  # flush=True をつけて即出力！
+    data = request.get_json(force=True)
+    print("📥 Webhook全体:", json.dumps(data, ensure_ascii=False), flush=True)
 
-    if "events" not in data:
-        print("⚠ 'events' キーが見つかりません！", flush=True)
-    else:
-        for event in data["events"]:
-            print("🧩 event:", event, flush=True)
-            user_id = event.get("source", {}).get("userId")
-            print("🔥 userId:", user_id, flush=True)
+    for event in data.get("events", []):
+        print("🧩 イベント内容:", json.dumps(event, ensure_ascii=False), flush=True)
+        user_id = event.get("source", {}).get("userId")
+        print("🔥 userId:", user_id, flush=True)
 
     return jsonify({"status": "ok"})
 
